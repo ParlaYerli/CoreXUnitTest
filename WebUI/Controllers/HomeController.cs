@@ -71,7 +71,21 @@ namespace WebUI.Controllers
             
             return View(student);
         }
-       
+        [HttpPost]
+        public IActionResult Edit(int id,User user)
+        {
+            if (id!=user.id)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                userService.update(user);
+                return RedirectToAction("Index");
+            }
+            return View(user);
+        }
+
         [HttpGet]
         public IActionResult Details(int? id)
         {

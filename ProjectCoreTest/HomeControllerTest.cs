@@ -78,14 +78,14 @@ namespace ProjectCoreTest
             Assert.Equal(user.name, resultUser.name);
         }
         [Fact]
-        public void Create_ActionExecutes_ReturnView()
+        public void CreateGet_ActionExecutes_ReturnView()
         {//create get metodu için test
             var result = _controller.Create();
             Assert.IsType<ViewResult>(result);
         }
 
         [Fact]
-        public void Create_InValidModelState_ReturnView()
+        public void CreatePost_InValidModelState_ReturnView()
         {
             _controller.ModelState.AddModelError("Name", "Name alanı gereklidir");
             var result = _controller.Create(users.First());
@@ -93,7 +93,7 @@ namespace ProjectCoreTest
             Assert.IsType<User>(viewResult.Model);
         }
         [Fact]
-        public void Create_ValidModelState_ReturnREdirectToIndexAction()
+        public void CreatePost_ValidModelState_ReturnREdirectToIndexAction()
         {
             //ctor parametresi olarak MockBehavior.Loose default olarak seçilidir.(düşük bağlı)
             //o yüzden mock nesnesini kullanmadım. eğer mockbehavior.strict olsaydı mock nesnesini kullanmak zorundaydım çünkğ sıkı bağlıdır.
@@ -103,7 +103,7 @@ namespace ProjectCoreTest
         }
 
         [Fact]
-        public void Create_ValidModelState_CreateMethodExecute()
+        public void CreatePost_ValidModelState_CreateMethodExecute()
         {
             User newUser = null;
             //itisany: herhangi bir user nesnesi alır ve dönen nesne callbackte newuser nesnesine atanır.
@@ -117,7 +117,7 @@ namespace ProjectCoreTest
         }
 
         [Fact]
-        public void Create_InvalidModalState_NeverCreateExecute()
+        public void CreatePost_InvalidModalState_NeverCreateExecute()
         {
             _controller.ModelState.AddModelError("Name", "Hata");
             var result = _controller.Create(users.First());
@@ -125,7 +125,7 @@ namespace ProjectCoreTest
         }
 
         [Fact]
-        public void Edit_IdIsNull_ReturnRedirectToIndexAction()
+        public void EditGet_IdIsNull_ReturnRedirectToIndexAction()
         {
             var result = _controller.Edit(null);
             var redirect = Assert.IsType<RedirectToActionResult>(result);
@@ -133,7 +133,7 @@ namespace ProjectCoreTest
         }
         [Theory]
         [InlineData(3)]
-        public void Edit_IdInValid_ReturnNotFound(int userId)
+        public void EditGet_IdInValid_ReturnNotFound(int userId)
         {
             User user = null;
             _mock.Setup(x => x.findById(userId)).Returns(user);
@@ -141,5 +141,56 @@ namespace ProjectCoreTest
             var redirect = Assert.IsType<NotFoundResult>(result);
             Assert.Equal<int>(404, redirect.StatusCode);
         }
+
+        [Theory]
+        [InlineData(2)]
+        public void EditGet_ActionExecutes_ReturnUser(int userId)
+        {
+            var user = users.First(x => x.id == userId);
+            _mock.Setup(x => x.findById(userId)).Returns(user);
+            var result = _controller.Edit(userId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var resultUser = Assert.IsAssignableFrom<User>(viewResult.Model);
+            Assert.Equal(user.id, resultUser.id);
+            Assert.Equal(user.name, resultUser.name);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public void EditPost_IdIsNotEqualUser_ReturnNotFound(int userId)
+        {
+            var result = _controller.Edit(2,users.First(x=>x.id==userId));
+            Assert.IsType<NotFoundResult>(result);
+        }
+        [Theory]
+        [InlineData(1)]
+        public void EditPost_InValidModalState_ReturnView(int userId)
+        {
+            _controller.ModelState.AddModelError("Name", "Hata");
+            var result = _controller.Edit(userId, users.First(x => x.id == userId));
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsAssignableFrom<User>(viewResult.Model);  
+        }
+        [Theory]
+        [InlineData(1)]
+        public void EditPost_ValidModalState_ReturnRedirectToIndexAction(int userId)
+        { //update metodunu göz ardı ettim. basarılı olma durumunda index e giriyor mu onu kontrol ettim.
+            var result = _controller.Edit(userId,users.First(x=>x.id==userId));
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+        }
+        [Theory]
+        [InlineData(1)]
+        public void EditPost_ValidModalState_UpdateMethodExecute(int userId)
+        { //update metodunun çalışmasını kontrol ettim.
+            var user = users.First(x => x.id == userId);
+            _mock.Setup(x => x.update(user));
+            _controller.Edit(userId, user);
+            _mock.Verify(x => x.update(It.IsAny<User>()), Times.Once);
+        }
+
+
+
+
     }
 }
