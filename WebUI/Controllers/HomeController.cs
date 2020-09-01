@@ -71,12 +71,7 @@ namespace WebUI.Controllers
             
             return View(student);
         }
-        public IActionResult Edit(User user)
-        {
-
-            userService.update(user);
-            return RedirectToAction("Index");
-        }
+       
         [HttpGet]
         public IActionResult Details(int? id)
         {

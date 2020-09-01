@@ -124,5 +124,22 @@ namespace ProjectCoreTest
             _mock.Verify(x => x.save(It.IsAny<User>()), Times.Never);
         }
 
+        [Fact]
+        public void Edit_IdIsNull_ReturnRedirectToIndexAction()
+        {
+            var result = _controller.Edit(null);
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+        [Theory]
+        [InlineData(3)]
+        public void Edit_IdInValid_ReturnNotFound(int userId)
+        {
+            User user = null;
+            _mock.Setup(x => x.findById(userId)).Returns(user);
+            var result = _controller.Edit(userId);
+            var redirect = Assert.IsType<NotFoundResult>(result);
+            Assert.Equal<int>(404, redirect.StatusCode);
+        }
     }
 }
