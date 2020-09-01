@@ -221,7 +221,7 @@ namespace ProjectCoreTest
         [InlineData(1)]
         public void DeletePost_ActionExecutes_ReturnRedirectToIndexAction(int userId)
         { //findbyid ve delete fonksiyonlarına bakmadan sadece index metoduna gidiyor mu diye kontrol ettim
-            var result = _controller.Delete(userId);
+            var result = _controller.DeleteConfirm(userId);
             Assert.IsType<RedirectToActionResult>(result);
         }
         [Theory]
@@ -230,7 +230,7 @@ namespace ProjectCoreTest
         {
             var user = users.First(x => x.id == userId);
             _mock.Setup(x => x.delete(user));
-            var result = _controller.Delete(userId);
+            var result = _controller.DeleteConfirm(userId);
             _mock.Verify(x => x.delete(It.IsAny<User>()), Times.Once);
         }
     }
