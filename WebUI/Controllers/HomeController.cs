@@ -43,9 +43,18 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete()
+        public IActionResult Delete(int? id)
         {
-            return View();
+            if (id==null)
+            {
+                return NotFound();
+            }
+            var user = userService.findById((int)id);
+            if (user==null)
+            {
+                return NotFound();
+            }
+            return View(user);
         }
 
         [HttpPost]
