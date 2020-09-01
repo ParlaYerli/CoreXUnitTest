@@ -189,8 +189,49 @@ namespace ProjectCoreTest
             _mock.Verify(x => x.update(It.IsAny<User>()), Times.Once);
         }
 
+        [Fact]
+        public void DeleteGet_IdIsNull_ReturnNotFound()
+        {
+            var result = _controller.Delete(null);
+            Assert.IsType<NotFoundResult>(result);
+        }
 
+        [Theory]
+        [InlineData(0)]
+        public void DeleteGet_IdInValid_ReturnNotFound(int userId)
+        {
+            User user = null;
+            _mock.Setup(x => x.findById(userId)).Returns(user);
+            var result = _controller.Delete(userId);
+            Assert.IsType<NotFoundResult>(result);
+        }
 
+        [Theory]
+        [InlineData(1)]
+        public void DeleteGet_ActionExecute_ReturnUser(int userId)
+        {
+            var user = users.First(x => x.id == userId);
+            _mock.Setup(x => x.findById(userId)).Returns(user);
+            var result = _controller.Delete(userId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsAssignableFrom<User>(viewResult.Model);
+        }
 
+        [Theory]
+        [InlineData(1)]
+        public void DeletePost_ActionExecutes_ReturnRedirectToIndexAction(int userId)
+        { //findbyid ve delete fonksiyonlarına bakmadan sadece index metoduna gidiyor mu diye kontrol ettim
+            var result = _controller.Delete(userId);
+            Assert.IsType<RedirectToActionResult>(result);
+        }
+        [Theory]
+        [InlineData(1)]
+        public void DeletePost_ActionExecutes_DeleteMethodExecute(int userId)
+        {
+            var user = users.First(x => x.id == userId);
+            _mock.Setup(x => x.delete(user));
+            var result = _controller.Delete(userId);
+            _mock.Verify(x => x.delete(It.IsAny<User>()), Times.Once);
+        }
     }
 }

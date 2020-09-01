@@ -56,7 +56,6 @@ namespace WebUI.Controllers
             }
             return View(user);
         }
-
         [HttpPost]
         public IActionResult Delete(int id)
         {
