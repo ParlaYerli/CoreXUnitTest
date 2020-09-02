@@ -21,15 +21,20 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("getall")]
-        public List<User> GetAll()
+        public IActionResult GetAll()
         {
-            return _userService.getList();
+            return Ok(_userService.getList());
         }
 
-        [HttpGet("getbyid/{userId}")]
-        public User GetUserById(int userId)
+        [HttpGet("{userId}")]
+        public IActionResult GetUser(int userId)
         {
-            return _userService.findById(userId);
+            var user = _userService.findById(userId);
+            if (user== null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
         }
         [HttpPost("add")]
         public IActionResult Add(User user)
@@ -37,7 +42,7 @@ namespace WebAPI.Controllers
             _userService.save(user);
             return CreatedAtAction("GetUserById", new { userId = user.id }, user);
         }
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var user = _userService.findById(id);
@@ -48,7 +53,7 @@ namespace WebAPI.Controllers
             _userService.delete(user);
             return NoContent();
         }
-        [HttpPut("update/{id}")]
+        [HttpPut("{id}")]
         public IActionResult Update(int id,User user)
         {
             if (id!=user.id)
